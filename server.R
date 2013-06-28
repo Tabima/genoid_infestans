@@ -9,6 +9,19 @@ gen <- NULL
 p <- NULL
 random.sample <- 1
 
+# Function that will add extra zeroes onto genotypes that are deficient in the right number of alleles.
+addzeroes <- function(x, ploidy = 3){
+  extras <- ploidy - vapply(strsplit(x, "/"), length, 69)
+  vapply(1:length(extras), function(y){
+    if(extras[y] > 0){
+      return(paste(c(x[y], rep(0, extras[y])), collapse = "/"))
+    }
+    else{
+      return(x[y])
+    }
+  }, "out")
+}
+
 shinyServer(function(input, output) {
  
   treeInput <- reactive({
@@ -25,8 +38,9 @@ shinyServer(function(input, output) {
     }
     a <- c(input$table)
     b<-unlist(strsplit(a,c("\n")))
-    b<-gsub("\\s+","\t",b)
-    b<-strsplit(b,c("\t"))
+    b <- strsplit(gsub("\\s+","\t",b), "\t")
+    #b<-strsplit(b,c("\t"))
+    b <- c(b[1:2], addzeroes(b[-(1:2)], ploidy = 3))
     t<-t(as.data.frame(b))
     rownames(t)<-NULL
     colnames(t)<-colnames(df.m)
