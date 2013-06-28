@@ -37,10 +37,11 @@ shinyServer(function(input, output) {
       plot(c(0,1),c(0,1),ann=F,bty='n',type='n',xaxt='n',yaxt='n') + rect(0,1,1,0.8,col="indianred2",border='transparent' ) + text(x=0.5, y=0.9, "No SSR data has been input.",cex=1.6, col="white")
     }
     a <- c(input$table)
-    b<-unlist(strsplit(a,c("\n")))
+    b <- unlist(strsplit(a,c("\n")))
     b <- strsplit(gsub("\\s+","\t",b), "\t")
+    print(b)
     #b<-strsplit(b,c("\t"))
-    b <- c(b[1:2], addzeroes(b[-(1:2)], ploidy = 3))
+    b <- lapply(b, function(x) c(x[1:2], addzeroes(x[-(1:2)], ploidy = 3)))
     t<-t(as.data.frame(b))
     rownames(t)<-NULL
     colnames(t)<-colnames(df.m)
