@@ -42,10 +42,10 @@ shinyServer(function(input, output) {
     print(b)
     #b<-strsplit(b,c("\t"))
     b <- lapply(b, function(x) c(x[1:2], addzeroes(x[-(1:2)], ploidy = 3)))
-    t<-t(as.data.frame(b))
-    rownames(t)<-NULL
-    colnames(t)<-colnames(df.m)
-    df.m <- rbind(df.m,t,deparse.level=0)
+    query<-t(as.data.frame(b))
+    rownames(query)<-NULL
+    colnames(query)<-colnames(df.m)
+    df.m <- rbind(df.m,query,deparse.level=0)
     df.m <- as.data.frame(df.m)
     gen <<- df2genind(df.m[, -c(1,2)], ploid=3, sep="/", pop=df.m[, 2], ind.names=df.m[, 1])
     if (input$boot > 1000){
@@ -58,7 +58,8 @@ shinyServer(function(input, output) {
     #Adding colors to the tip values according to the clonal lineage
     gen$other$tipcolor <<- pop(gen)
     cat(gen$other$color)
-    levels(gen$other$tipcolor) <<- c("blue","darkcyan","darkolivegreen","blue","yellow3","violet", "skyblue", "green", "blue", "orange", "orangered","magenta","cyan","darkorchid","darkred","aquamarine3","gold","tan","maroon", "red") 
+    print(heat.colors(length(unique(query[, 2]))))
+    levels(gen$other$tipcolor) <<- c("blue","darkcyan","darkolivegreen","blue","yellow3","violet", "skyblue", "green", "blue", "#26B300FF", "#28B400FF","magenta","cyan","darkorchid","#E7CB20FF","aquamarine3","gold","tan","maroon",heat.colors(length(unique(query[, 2]))))
     gen$other$tipcolor <<- as.character(gen$other$tipcolor)
       #Running the tree, setting a cutoff of 50 and saving it into a variable to be plotted (a)
     if (input$tree=="nj"){
@@ -92,16 +93,18 @@ shinyServer(function(input, output) {
       plot(c(0,1),c(0,1),ann=F,bty='n',type='n',xaxt='n',yaxt='n') + rect(0,1,1,0.8,col="indianred2",border='transparent' ) + text(x=0.5, y=0.9, "No SSR data has been input.",cex=1.6, col="white")
     }
     a <- c(input$table)
-    b<-unlist(strsplit(a,c("\n")))
-    b<-sub(" ","\t",b)
-    b<-strsplit(b,c("\t"))
-    t<-t(as.data.frame(b))
-    rownames(t)<-NULL
-    colnames(t)<-colnames(df.m)
-    df.m <- rbind(df.m,t,deparse.level=0)
+    b <- unlist(strsplit(a,c("\n")))
+    b <- strsplit(gsub("\\s+","\t",b), "\t")
+    print(b)
+    #b<-strsplit(b,c("\t"))
+    b <- lapply(b, function(x) c(x[1:2], addzeroes(x[-(1:2)], ploidy = 3)))
+    query<-t(as.data.frame(b))
+    rownames(query)<-NULL
+    colnames(query)<-colnames(df.m)
+    df.m <- rbind(df.m,query,deparse.level=0)
     df.m <- as.data.frame(df.m)
     gen <<- df2genind(df.m[, -c(1,2)], ploid=3, sep="/", pop=df.m[, 2], ind.names=df.m[, 1])
-    msn.plot <<- bruvo.msn(gen, palette=colorRampPalette(c("blue","darkcyan","darkolivegreen","blue","yellow3","violet", "skyblue", "green", "blue", "orange", "orangered","magenta","cyan","darkorchid","darkred","aquamarine3","gold","tan","maroon", "red")),replen=c(3,3,2,3,3,2,2,3,3,3,3,3))
+    msn.plot <<- bruvo.msn(gen, palette=colorRampPalette(c("blue","darkcyan","darkolivegreen","blue","yellow3","violet", "skyblue", "green", "blue", "orange", "orangered","magenta","cyan","darkorchid","darkred","aquamarine3","gold","tan","maroon", heat.colors(length(unique(query[, 2]))))),replen=c(3,3,2,3,3,2,2,3,3,3,3,3))
     V(msn.plot$graph)$size <<- 10
      #x <<- sample(10000, 1)
     x <<- 200
