@@ -62,7 +62,7 @@ shinyServer(function(input, output) {
        gen$other$tipcolor <<- as.character(gen$other$tipcolor)
          #Running the tree, setting a cutoff of 50 and saving it into a variable to be plotted (a)
        if (input$tree=="nj"){
-        a <<- poppr:::genoid.bruvo.boot(gen, replen = ssr, sample=input$boot, tree=input$tree, cutoff=50)
+        a <<- bruvo.boot(gen, replen = ssr, sample=input$boot, tree=input$tree, cutoff=50)
         a <<- phangorn::midpoint(ladderize(a))
        }
        else {
