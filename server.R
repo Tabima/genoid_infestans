@@ -6,6 +6,7 @@ df <- read.table("reduced_database.txt.csv", header=TRUE, sep="\t")
 df.m <- as.matrix(df)
 #newrow <- c()
 msn.plot <- NULL
+labs <- NULL
 p <- NULL
 a <- NULL
 gen <- NULL
@@ -33,54 +34,62 @@ shinyServer(function(input, output) {
            )
   })
 
-  output$distPlotTree <- renderPlot({
-    #newrow <<- c("query","???",input$mst1,input$mst2,input$mst3,input$mst4,input$mst5,input$mst6,input$mst7,input$mst8,input$mst9)
+output$distPlotTree <- renderPlot({
+    #newrow <<- c("query", "???", input$mst1, input$mst2, input$mst3, input$mst4, input$mst5, input$mst6, input$mst7, input$mst8, input$mst9)
     if (gsub("\\s", "", input$table) == ""){
-      plot(c(0,1),c(0,1),ann=F,bty='n',type='n',xaxt='n',yaxt='n') + rect(0,1,1,0.8,col="indianred2",border='transparent' ) + text(x=0.5, y=0.9, "No SSR data has been input.",cex=1.6, col="white")
+      plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n') + rect(0, 1, 1, 0.8, col = "indianred2", border = 'transparent' ) + text(x = 0.5, y = 0.9, "No SSR data has been input.", cex = 1.6, col = "white")
     }
     else{
       p <- c(input$table)
-      b<-unlist(strsplit(p,c("\n")))
-      b<-sub(" ","\t",b)
-      b<-strsplit(b,c("\t"))
-      t<-t(as.data.frame(b))
-      rownames(t)<-NULL
-      colnames(t)<-colnames(df.m)
-      df.m <- rbind(df.m,t,deparse.level=0)
+      b <- unlist(strsplit(p, c("\n")))
+      b <- sub(" ", "\t", b)
+      b <- strsplit(b, c("\t"))
+      t <- t(as.data.frame(b))
+      rownames(t) <- NULL
+      colnames(t) <- colnames(df.m)
+      df.m <- rbind(df.m, t, deparse.level = 0)
       df.m <- as.data.frame(df.m)
-      gen <<- df2genind(df.m[, -c(1,2)], ploid=3, sep="/", pop=df.m[, 2], ind.names=df.m[, 1])
+      gen <<- df2genind(df.m[, -c(1, 2)], ploid = 2, sep = "/", pop = df.m[, 2], ind.names = df.m[, 1])
+      # popchar <- nchar(levels(pop(gen)))
+      # maxchar <- max(popchar)
+      # levels(pop(gen)) <- paste(levels(pop(gen)), vapply(popchar, function(x) paste(rep(" ", maxchar - x), collapse = ""), ""))
       if (input$boot > 1000){
-        plot(c(0,1),c(0,1),ann=F,bty='n',type='n',xaxt='n',yaxt='n') + rect(0,1,1,0.8,col="indianred2",border='transparent' ) + text(x=0.5, y=0.9, "The number of bootstrap repetitions should be less or equal to 2000",cex=1.6, col="white")
+        plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n') + rect(0, 1, 1, 0.8, col = "indianred2", border = 'transparent' ) + text(x = 0.5, y = 0.9, "The number of bootstrap repetitions should be less or equal to 2000", cex = 1.6, col = "white")
       }
       else if (input$boot < 10){
-        plot(c(0,1),c(0,1),ann=F,bty='n',type='n',xaxt='n',yaxt='n') + rect(0,1,1,0.8,col="indianred2",border='transparent' ) + text(x=0.5, y=0.9, "The number of bootstrap repetitions should be greater than 10",cex=1.6, col="white")
+        plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n') + rect(0, 1, 1, 0.8, col = "indianred2", border = 'transparent' ) + text(x = 0.5, y = 0.9, "The number of bootstrap repetitions should be greater than 10", cex = 1.6, col = "white")
       }
       else{
        #Adding colors to the tip values according to the clonal lineage
        gen$other$tipcolor <<- pop(gen)
-       levels(gen$other$tipcolor) <<- c("blue","darkcyan","darkolivegreen","darkgoldenrod","red", rainbow(length(levels(gen$other$tipcolor)) - 4))
+       levels(gen$other$tipcolor) <<- c("blue", "darkcyan", "darkolivegreen", "darkgoldenrod", "red", rainbow(length(levels(gen$other$tipcolor)) - 4))
        gen$other$tipcolor <<- as.character(gen$other$tipcolor)
          #Running the tree, setting a cutoff of 50 and saving it into a variable to be plotted (a)
+<<<<<<< HEAD
        if (input$tree=="nj"){
         a <<- bruvo.boot(gen, replen = ssr, sample=input$boot, tree=input$tree, cutoff=50)
+=======
+       if (input$tree == "nj"){
+        a <<- poppr:::genoid.bruvo.boot(gen, replen = ssr, sample = input$boot, tree = input$tree, cutoff = 50)
+>>>>>>> 7fadc2ce79e8bc1601747db12a0bf78735773834
         a <<- phangorn::midpoint(ladderize(a))
        }
        else {
-         a <<- bruvo.boot(gen, sample=input$boot, tree=input$tree, cutoff=50)
+         a <<- bruvo.boot(gen, sample = input$boot, tree = input$tree, cutoff = 50)
        }
        #Drawing the tree
        plot.phylo(a)
        #Adding the tip lables from each population, and with the already defined colors
-       tiplabels(pop(gen), adj=c(-4, 0.5), frame="n", col=gen$other$tipcolor, cex=0.8, font=2)
+       tiplabels(pop(gen), adj = c(-4, 0.5), frame = "n", col = gen$other$tipcolor, cex = 0.8, font = 2)
        
        #Adding the nodel labels: Bootstrap values.
-       nodelabels(a$node.label, adj = c(1.2,-0.5), frame="n", cex=0.9, font=3)
+       nodelabels(a$node.label, adj = c(1.2, -0.5), frame = "n", cex = 0.9, font = 3)
        
-       if (input$tree=="upgma"){
+       if (input$tree == "upgma"){
          axisPhylo(3)
        }
        else if (input$tree == "nj"){
-         add.scale.bar(x=0.89,y=1.18,length=0.05,lwd=2)
+         add.scale.bar(x = 0.89, y = 1.18, length = 0.05, lwd = 2)
        }
      }
    }
@@ -89,57 +98,72 @@ shinyServer(function(input, output) {
 #Minimum Spanning Network
   output$MinSpanTree <- renderPlot({
     if (gsub("\\s", "", input$table) == ""){
-      plot(c(0,1),c(0,1),ann=F,bty='n',type='n',xaxt='n',yaxt='n') + rect(0,1,1,0.8,col="indianred2",border='transparent' ) + text(x=0.5, y=0.9, "No SSR data has been input.",cex=1.6, col="white")
+      plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n') + rect(0, 1, 1, 0.8, col = "indianred2", border = 'transparent' ) + text(x = 0.5, y = 0.9, "No SSR data has been input.", cex = 1.6, col = "white")
     }
     else{
-    	p <- c(input$table)
-	    b<-unlist(strsplit(p,c("\n")))
-	    b<-sub(" ","\t",b)
-	    b<-strsplit(b,c("\t"))
-	    t<-t(as.data.frame(b))
-	    rownames(t)<-NULL
-	    colnames(t)<-colnames(df.m)
-	    df.m <- rbind(df.m,t,deparse.level=0)
-	    df.m <- as.data.frame(df.m)
-	    gen <<- df2genind(df.m[, -c(1,2)], ploid=3, sep="/", pop=df.m[, 2], ind.names=df.m[, 1])
-	    msn.plot <<- bruvo.msn(gen)
-	    V(msn.plot$graph)$size <<- 10
-	    #x <<- sample(10000, 1)
-	    x <<- 200
-	    set.seed(x)
-	    plot.igraph(msn.plot$graph, vertex.label=NA)
-	    legend("topleft" ,bty = "n", cex = 1.2, legend = msn.plot$populations,title = "Populations", fill = msn.plot$color, border = NULL)
-    }  	
+      p <- c(input$table)
+      b <- unlist(strsplit(p, c("\n")))
+      b <- sub(" ", "\t", b)
+      b <- strsplit(b, c("\t"))
+      t <- t(as.data.frame(b))
+      rownames(t) <- NULL
+      colnames(t) <- colnames(df.m)
+      
+      df.m <- rbind(df.m, t, deparse.level = 0)
+      df.m <- as.data.frame(df.m)
+      gen <<- df2genind(df.m[, -c(1, 2)], ploid = 2, sep = "/", pop = df.m[, 2], ind.names = df.m[, 1])
+      msn.plot <<- bruvo.msn(gen, replen = ssr)
+      V(msn.plot$graph)$size <<- 10
+
+      # Highlighting only the names of the submitted genotypes and the isolates they match with.
+      number_of_queries <- nrow(t)
+      gen.mlg <- mlg.vector(gen)
+      gen.input <- unique(gen.mlg[(1+length(gen.mlg)-number_of_queries):length(gen.mlg)])
+      labs <- unlist(strsplit(V(msn.plot$graph)$label, "\\."))
+      labs <- as.numeric(labs[!labs %in% "MLG"])
+      chosenlabs <- labs[which(labs %in% gen.input)]
+      gen.input <- gen.input[vapply(chosenlabs, function(x) which(gen.input == x), 1)]
+      combined_names <- vapply(gen.input, function(x) paste(rev(gen@ind.names[gen.mlg == x]), collapse = "\n"), " ")
+      labs[which(!labs %in% gen.input)] <- NA
+      labs[!is.na(labs)] <- combined_names
+      labs <<- labs
+
+      #x <<- sample(10000, 1)
+      x <<- 200
+      set.seed(x)
+      plot.igraph(msn.plot$graph, vertex.label = labs, vertex.label.font = 2, vertex.label.dist = 0.5, vertex.label.color = "firebrick")
+      legend("topleft" , bty = "n", cex = 1.2, legend = msn.plot$populations, title = "Populations", fill = msn.plot$color, border = NULL)
+    }   
     
   })
   
   
   output$downloadData <- downloadHandler(
-    filename = function() { paste(input$tree, '.tre', sep='') },
+    filename = function() { paste(input$tree, '.tre', sep = '') },
     content = function(file) {
       write.tree(a, file)
     })
   
   output$downloadPdf <- downloadHandler(
-    filename = function() { paste(input$tree, '.pdf', sep='') },
+    filename = function() { paste(input$tree, '.pdf', sep = '') },
     content = function(file) {
       pdf(file)
-      plot.phylo(a, cex=0.5)
-      tiplabels(pop(gen), adj=c(-4, 0.5), frame="n", col=gen$other$tipcolor, cex=0.4, font=2)
-      nodelabels(a$node.label, adj = c(1.2,-0.5), frame="n", cex=0.4, font=3)
-      if (input$tree=="upgma"){
+      plot.phylo(a, cex = 0.5)
+      tiplabels(pop(gen), adj = c(-4, 0.5), frame = "n", col = gen$other$tipcolor, cex = 0.4, font = 2)
+      nodelabels(a$node.label, adj = c(1.2, -0.5), frame = "n", cex = 0.4, font = 3)
+      if (input$tree == "upgma"){
         axisPhylo(3)
         }
       dev.off()
   })
 
   output$downloadPdfMst <- downloadHandler(
-    filename = function() { paste("min_span_net", '.pdf', sep='')} ,
+    filename = function() { paste("min_span_net", '.pdf', sep = '')} ,
     content = function(file) {
     pdf(file)
     set.seed(x)
-    plot.igraph(msn.plot$graph, vertex.label=NA)
-    legend("topleft" ,bty = "n", cex = 1.2, legend = msn.plot$populations,title = "Populations", fill = msn.plot$color, border = NULL)
+    plot.igraph(msn.plot$graph, , vertex.label = labs, vertex.label.font = 2, vertex.label.dist = 0.5, vertex.label.color = "firebrick")
+    legend("topleft" , bty = "n", cex = 1.2, legend = msn.plot$populations, title = "Populations", fill = msn.plot$color, border = NULL)
     dev.off()
   }
   )
