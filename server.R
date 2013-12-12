@@ -65,13 +65,8 @@ output$distPlotTree <- renderPlot({
        levels(gen$other$tipcolor) <<- c("blue", "darkcyan", "darkolivegreen", "darkgoldenrod", "red", rainbow(length(levels(gen$other$tipcolor)) - 4))
        gen$other$tipcolor <<- as.character(gen$other$tipcolor)
          #Running the tree, setting a cutoff of 50 and saving it into a variable to be plotted (a)
-<<<<<<< HEAD
        if (input$tree=="nj"){
         a <<- bruvo.boot(gen, replen = ssr, sample=input$boot, tree=input$tree, cutoff=50)
-=======
-       if (input$tree == "nj"){
-        a <<- poppr:::genoid.bruvo.boot(gen, replen = ssr, sample = input$boot, tree = input$tree, cutoff = 50)
->>>>>>> 7fadc2ce79e8bc1601747db12a0bf78735773834
         a <<- phangorn::midpoint(ladderize(a))
        }
        else {
