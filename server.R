@@ -70,7 +70,7 @@ output$distPlotTree <- renderPlot({
         a <<- phangorn::midpoint(ladderize(a))
        }
        else {
-         a <<- bruvo.boot(gen, sample = input$boot, tree = input$tree, cutoff = 50)
+         a <<- bruvo.boot(gen, replen = ssr, sample = input$boot, tree = input$tree, cutoff = 50)
        }
        #Drawing the tree
        plot.phylo(a)
